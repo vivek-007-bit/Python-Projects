@@ -10,7 +10,7 @@ import os
 def build():
     print("Building Flappy Bird WebAssembly package with pygbag...")
     os.makedirs("build/web", exist_ok=True)
-    cmd = [sys.executable, "-m", "pygbag", "--build", "."]
+    cmd = [sys.executable, "-m", "pygbag", "--ume_block", "0", "--build", "main.py"]
     try:
         subprocess.check_call(cmd)
         print("\n[OK] Build complete! Web build is available at 'build/web/'")
