@@ -1,9 +1,0 @@
-# Prevent Vercel from treating Python files as Serverless Functions
-main.py
-build.py
-game/
-tests/
-tools/
-requirements.txt
-default.tmpl
-highscore.json
