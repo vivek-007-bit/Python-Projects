@@ -1,0 +1,63 @@
+"""
+Game configuration and global constants for Flappy Bird.
+"""
+
+# Screen & Display (Logical Resolution)
+GAME_WIDTH = 400
+GAME_HEIGHT = 700
+FPS = 60
+
+# World & Physics
+GRAVITY = 0.42
+FLAP_STRENGTH = -8.2
+MAX_FALL_SPEED = 10.5
+ROTATION_SPEED = 3.0
+
+# Player / Bird
+PLAYER_START_X = 90
+PLAYER_START_Y = 290
+BIRD_WIDTH = 44
+BIRD_HEIGHT = 32
+BIRD_FLAP_ANIM_SPEED = 0.18  # Animation speed (frame cycle rate)
+
+# Ground & Environment
+GROUND_HEIGHT = 112
+GROUND_Y = GAME_HEIGHT - GROUND_HEIGHT  # 588
+GROUND_SPEED = 3.0
+BG_SPEED = 0.6
+
+# Pipes
+PIPE_WIDTH = 70
+PIPE_GAP = 175
+PIPE_SPEED = 3.0
+PIPE_MIN_TOP_HEIGHT = 80
+PIPE_MAX_TOP_HEIGHT = 350
+PIPE_SPAWN_DISTANCE = 230  # Horizontal spacing between consecutive pipes
+
+# Audio
+MASTER_VOLUME = 0.7
+
+# Colors (RGB)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+SKY_BLUE = (100, 195, 220)
+GROUND_SAND = (222, 215, 150)
+GRASS_GREEN = (115, 190, 45)
+PIPE_GREEN = (115, 190, 45)
+GOLD = (255, 215, 0)
+BRONZE = (205, 127, 50)
+SILVER = (192, 192, 192)
+PLATINUM = (229, 228, 226)
+UI_TEXT_COLOR = (255, 255, 255)
+UI_SHADOW_COLOR = (35, 45, 55)
+CARD_BG = (235, 225, 185)
+CARD_BORDER = (115, 80, 40)
+
+# Game States
+STATE_MENU = "MENU"
+STATE_PLAYING = "PLAYING"
+STATE_PAUSED = "PAUSED"
+STATE_GAME_OVER = "GAME_OVER"
+
+# High Score file
+SCORE_FILE = "highscore.json"
