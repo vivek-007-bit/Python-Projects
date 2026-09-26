@@ -1,8 +1,7 @@
 {
-  "version": 2,
+  "framework": null,
   "outputDirectory": "build/web",
-  "buildCommand": "pip install -r requirements.txt && python -m pygbag --build .",
-  "cleanUrls": true,
+  "cleanUrls": false,
   "headers": [
     {
       "source": "/(.*)",
