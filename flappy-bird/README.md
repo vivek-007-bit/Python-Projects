@@ -1,6 +1,6 @@
 # 🐦 Flappy Bird - Python + Pygame + WebAssembly
 
-A complete, polished **Flappy Bird** game built with **Python** and **pygame-ce**, packaged for modern web browsers via **pygbag / WebAssembly**, and ready for automated deployment to **Render**.
+A complete, polished **Flappy Bird** game built with **Python** and **pygame-ce**, packaged for modern web browsers via **pygbag / WebAssembly**, and ready for instant deployment to **Vercel**.
 
 ---
 
@@ -30,19 +30,25 @@ A complete, polished **Flappy Bird** game built with **Python** and **pygame-ce*
 ```text
 Python 3 (pygame-ce)
         ↓
-     pygbag
+    pygbag
         ↓
  WebAssembly (Wasm)
         ↓
   Modern Browser
         ↓
- Render Static Site CDN
+ Vercel Static CDN
 ```
 
 ### Project Structure
 
 ```text
-flappy-bird/
+Flappy Bird/
+├── build/
+│   └── web/                   # Generated WebAssembly browser package
+│       ├── index.html
+│       ├── favicon.png
+│       ├── flappy.bird.apk
+│       └── flappy.bird.tar.gz
 ├── game/
 │   ├── assets/
 │   │   ├── images/            # Sprites (bird, pipe, background, ground)
@@ -58,13 +64,11 @@ flappy-bird/
 ├── tests/
 │   └── test_game.py           # Automated unit test suite
 ├── tools/
-│   ├── create_template.py     # Custom arcade loading UI template generator
 │   └── generate_assets.py     # Asset & audio synthesizer script
-├── default.tmpl               # Custom arcade loading screen Pygbag template
 ├── build.py                   # Pygbag build script
 ├── main.py                    # Root entry point
 ├── requirements.txt           # Python dependencies (pygame-ce, pygbag)
-├── RENDER_DEPLOYMENT.md       # Render Static Site deployment guide
+├── vercel.json                # Vercel static hosting configuration
 └── README.md
 ```
 
@@ -127,35 +131,55 @@ python build.py
 ```
 Or directly via the CLI:
 ```bash
-python -m pygbag --ume_block 0 --build main.py
+python -m pygbag --build .
 ```
 
 This packages the application into the `build/web/` directory containing:
-* `index.html` (WebAssembly loader and retro arcade loading interface)
-* `flappy-bird.apk` / `flappy-bird.tar.gz` (Packaged assets and Python bytecode)
+* `index.html` (WebAssembly loader and HTML5 Canvas interface)
+* `flappy.bird.apk` / `flappy.bird.tar.gz` (Packaged assets and Python bytecode)
 * `favicon.png`
 
 ### Test Web Build Locally
 
-To test the browser game locally with a static web server:
+To test the browser game locally in your browser with a live test server:
 ```bash
-python -m http.server 5500 --directory build/web
+python -m pygbag .
 ```
-Then navigate to `http://localhost:5500` in your web browser.
+Then navigate to `http://localhost:8000` in your web browser.
 
 ---
 
-## ☁️ Deployment to Render
+## ☁️ Deployment to Vercel
 
-The game deploys automatically as a **Render Static Site**. On every GitHub push, Render runs `pygbag` to build fresh WebAssembly assets and serves them globally.
+Vercel serves the generated WebAssembly static build (`build/web/`) through its global edge CDN.
 
-### Render Static Site Settings:
-* **Service Type**: Static Site
-* **Root Directory**: `flappy-bird`
-* **Build Command**: `pip install -r requirements.txt && python -m pygbag --ume_block 0 --build main.py`
-* **Publish Directory**: `build/web`
+### Option A: Automated Git Deployment (Recommended)
 
-See [RENDER_DEPLOYMENT.md](RENDER_DEPLOYMENT.md) for detailed deployment setup and instructions.
+1. Push this repository to GitHub:
+   ```bash
+   git init
+   git add .
+   git commit -m "feat: complete Flappy Bird web game"
+   git remote add origin https://github.com/<your-username>/<repo-name>.git
+   git push -u origin main
+   ```
+2. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **"Add New Project"**.
+3. Import your GitHub repository.
+4. Vercel will automatically detect `vercel.json` and serve the `build/web` directory with the proper WebAssembly headers (`Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy`).
+5. Click **Deploy**.
+
+### Option B: Deploy via Vercel CLI
+
+```bash
+# Install Vercel CLI (if not already installed)
+npm install -g vercel
+
+# Build the WebAssembly bundle
+python build.py
+
+# Deploy to Vercel
+vercel --prod
+```
 
 ---
 

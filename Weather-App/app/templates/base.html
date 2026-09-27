@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-[#090D14] text-slate-100 antialiased">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AuraCast — Weather & Time-Series Prediction{% endblock %}</title>
+    
+    <!-- Meta tags for mobile and search -->
+    <meta name="description" content="Professional real-time weather application with local time-series predictive modeling based on historical weather patterns.">
+    <meta name="theme-color" content="#090D14">
+    
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        surface: {
+                            base: '#090D14',
+                            card: '#111724',
+                            elevated: '#172032',
+                            hover: '#1E2A40',
+                        },
+                        border: {
+                            subtle: 'rgba(255, 255, 255, 0.07)',
+                            medium: 'rgba(255, 255, 255, 0.12)',
+                            active: 'rgba(56, 189, 248, 0.35)',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Chart.js for Historical Trend Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS (Skeletons, Scrollbars, Transitions) -->
+    <link rel="stylesheet" href="/static/css/custom.css">
+</head>
+<body class="min-h-full flex flex-col font-sans bg-[#090D14] text-slate-100 selection:bg-sky-500 selection:text-slate-950">
+
+    <!-- Top Navigation Header -->
+    <header class="border-b border-white/[0.06] bg-[#090D14]/90 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+            <!-- Brand -->
+            <a href="/" class="flex items-center space-x-3 group text-decoration-none">
+                <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/25 flex items-center justify-center text-sky-400 group-hover:border-sky-400/50 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path>
+                    </svg>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-base sm:text-lg font-semibold tracking-tight text-white group-hover:text-sky-300 transition-colors">AuraCast</span>
+                    <span class="hidden md:inline text-[11px] text-slate-400 font-normal">Weather & ML Forecast</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links & Live Status -->
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <nav class="flex items-center space-x-1 sm:space-x-1.5 mr-1 sm:mr-2">
+                    <a 
+                        href="/" 
+                        class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {% if active_page == 'weather' %}text-sky-300 bg-sky-500/10 border border-sky-500/20{% else %}text-slate-400 hover:text-slate-200 hover:bg-[#172032]{% endif %}"
+                    >
+                        Weather
+                    </a>
+                    <a 
+                        href="/model-docs" 
+                        class="px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-medium transition-colors {% if active_page == 'model_docs' %}text-sky-300 bg-sky-500/10 border border-sky-500/20{% else %}text-slate-400 hover:text-slate-200 hover:bg-[#172032]{% endif %}"
+                    >
+                        Model Docs
+                    </a>
+                </nav>
+
+                <!-- Live UTC Clock -->
+                <div class="hidden xs:flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#111724] border border-white/[0.06] text-[11px] font-mono text-slate-300">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span id="utc-clock">--:--:-- UTC</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Clean, Understated Footer -->
+    <footer class="border-t border-white/[0.06] bg-[#090D14] py-5 text-center text-xs text-slate-400">
+        <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-slate-400">
+            <p>AuraCast • Real-Time Weather & Machine Learning Prediction</p>
+            <p class="text-slate-400">Historical data via Open-Meteo • Live observations via OpenWeather</p>
+        </div>
+    </footer>
+
+    <!-- App JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

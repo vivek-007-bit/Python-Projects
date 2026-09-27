@@ -1,0 +1,715 @@
+{% extends "base.html" %}
+
+{% block title %}How Our Weather Prediction Model Works — AuraCast Documentation{% endblock %}
+
+{% block content %}
+<div class="space-y-10 pb-12 max-w-5xl mx-auto">
+
+    <!-- Page Header & Breadcrumb -->
+    <section class="space-y-3 pt-2">
+        <div class="flex items-center gap-2 text-xs text-slate-400">
+            <a href="/" class="hover:text-sky-300 transition-colors">Weather Dashboard</a>
+            <span>/</span>
+            <span class="text-slate-200 font-medium">Model Documentation</span>
+        </div>
+        <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-white/[0.06] pb-6">
+            <div>
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-sky-500/10 border border-sky-500/20 text-sky-300 text-xs font-medium mb-3">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span>Technical Architecture & Methodology</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white tracking-tight">
+                    How Our Weather Prediction Model Works
+                </h1>
+                <p class="text-sm sm:text-base text-slate-300 mt-2 max-w-3xl leading-relaxed">
+                    A transparent look at the on-demand, location-specific time-series machine learning pipeline powering AuraCast's short-range precipitation and meteorological forecasting.
+                </p>
+            </div>
+            <a href="/" class="self-start md:self-auto px-4 py-2 bg-[#172032] hover:bg-[#1E2A40] text-sky-400 hover:text-sky-300 border border-white/[0.08] rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Dashboard
+            </a>
+        </div>
+    </section>
+
+    <!-- Table of Contents Quick Navigation -->
+    <section class="bg-[#111724] border border-white/[0.07] rounded-xl p-4 sm:p-5">
+        <h3 class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3">Documentation Index</h3>
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 text-xs">
+            <a href="#section-architecture" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">1. Architecture</a>
+            <a href="#section-overview" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">2. Overview</a>
+            <a href="#section-data-sources" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">3. Data Sources</a>
+            <a href="#section-preprocessing" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">4. Preprocessing</a>
+            <a href="#section-features" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">5. Feature Engineering</a>
+            <a href="#section-ml-models" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">6. ML Models</a>
+            <a href="#section-prediction-flow" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">7. Prediction Flow</a>
+            <a href="#section-forecast-interpretation" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">8. Forecast Output</a>
+            <a href="#section-limitations" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">9. Limitations</a>
+            <a href="#section-evaluation" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">10. Model Evaluation</a>
+            <a href="#section-tech-stack" class="p-2 rounded-lg bg-[#172032] text-slate-300 hover:text-sky-300 hover:border-sky-500/30 border border-white/[0.04] transition-colors">11. Technical Details</a>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         1. PREDICTION ARCHITECTURE DIAGRAM
+         ========================================================================= -->
+    <section id="section-architecture" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-5">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            System Architecture
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">End-to-End Pipeline Architecture</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            The diagram below illustrates how raw external telemetry is ingested, cleansed, transformed into structured features, and processed through Scikit-Learn Random Forest estimators to produce actionable weather predictions.
+        </p>
+
+        <!-- HTML / CSS Visual Flow Architecture Diagram -->
+        <div class="pt-4 overflow-x-auto">
+            <div class="min-w-[680px] space-y-3 font-mono text-xs">
+                
+                <!-- Stage 1: Ingestion -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-[#172032] border border-sky-500/30 rounded-xl p-3.5 text-center">
+                        <span class="text-[10px] text-sky-400 font-semibold block uppercase">Real-Time Ingestion</span>
+                        <strong class="text-slate-100 text-xs mt-1 block">OpenWeather API</strong>
+                        <span class="text-[11px] text-slate-400 font-sans">Current Temperature, Humidity, Wind, Pressure, Sky Condition</span>
+                    </div>
+                    <div class="bg-[#172032] border border-indigo-500/30 rounded-xl p-3.5 text-center">
+                        <span class="text-[10px] text-indigo-400 font-semibold block uppercase">Historical Ingestion</span>
+                        <strong class="text-slate-100 text-xs mt-1 block">Open-Meteo Archive API</strong>
+                        <span class="text-[11px] text-slate-400 font-sans">30-Day Chronological Hourly Dataset (~720 Observations)</span>
+                    </div>
+                </div>
+
+                <!-- Arrow -->
+                <div class="flex justify-center text-slate-500 text-base py-0.5">↓</div>
+
+                <!-- Stage 2: Preprocessing -->
+                <div class="bg-[#172032] border border-white/[0.08] rounded-xl p-3.5 text-center">
+                    <span class="text-[10px] text-emerald-400 font-semibold block uppercase">Data Cleaning & Validation (`preprocessing.py`)</span>
+                    <strong class="text-slate-100 text-xs mt-1 block">Time-Series Sanitization & Missing Value Fill</strong>
+                    <span class="text-[11px] text-slate-400 font-sans">Strict chronological sort → forward/backward fill (`ffill`/`bfill`) → physical bounds clipping → target generation</span>
+                </div>
+
+                <!-- Arrow -->
+                <div class="flex justify-center text-slate-500 text-base py-0.5">↓</div>
+
+                <!-- Stage 3: Feature Engineering -->
+                <div class="bg-[#172032] border border-white/[0.08] rounded-xl p-3.5 text-center">
+                    <span class="text-[10px] text-amber-400 font-semibold block uppercase">Feature Matrix Generation (`features.py`)</span>
+                    <strong class="text-slate-100 text-xs mt-1 block">30 Engineered Meteorological & Harmonic Features</strong>
+                    <span class="text-[11px] text-slate-400 font-sans">Sine/Cosine harmonics (hour, month) + Dew Point + Wind U/V Vectors + Lags (1h, 2h, 3h, 6h) + Rolling Means/Std + 3h Pressure Tendency</span>
+                </div>
+
+                <!-- Arrow -->
+                <div class="flex justify-center text-slate-500 text-base py-0.5">↓</div>
+
+                <!-- Stage 4: ML Training & Evaluation -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-[#172032] border border-emerald-500/30 rounded-xl p-3.5 text-center">
+                        <span class="text-[10px] text-emerald-400 font-semibold block uppercase">Classification Model</span>
+                        <strong class="text-slate-100 text-xs mt-1 block">RandomForestClassifier</strong>
+                        <span class="text-[11px] text-slate-400 font-sans">24h Rain Probability (`predict_proba`) & Risk Level (Low/Mod/High/Very High)</span>
+                    </div>
+                    <div class="bg-[#172032] border border-cyan-500/30 rounded-xl p-3.5 text-center">
+                        <span class="text-[10px] text-cyan-400 font-semibold block uppercase">Multi-Horizon Regression</span>
+                        <strong class="text-slate-100 text-xs mt-1 block">6× RandomForestRegressor</strong>
+                        <span class="text-[11px] text-slate-400 font-sans">Multi-horizon hourly forecasts (+1h to +6h Temperature & Humidity)</span>
+                    </div>
+                </div>
+
+                <!-- Arrow -->
+                <div class="flex justify-center text-slate-500 text-base py-0.5">↓</div>
+
+                <!-- Stage 5: Validation & Response -->
+                <div class="bg-[#172032] border border-sky-500/30 rounded-xl p-3.5 text-center">
+                    <span class="text-[10px] text-sky-400 font-semibold block uppercase">Delivery Layer (`weather_service.py` & FastAPI)</span>
+                    <strong class="text-slate-100 text-xs mt-1 block">Chronological Validation & Progressive UI Delivery</strong>
+                    <span class="text-[11px] text-slate-400 font-sans">80/20 train-test evaluation (MAE, RMSE, F1) → JSON Bundle → Interactive Chart.js & Gauge UI</span>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         2. OVERVIEW
+         ========================================================================= -->
+    <section id="section-overview" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 1
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Overview & Core Concept</h2>
+        <div class="text-xs sm:text-sm text-slate-300 space-y-3 leading-relaxed">
+            <p>
+                AuraCast incorporates an on-demand machine learning pipeline that forecasts local weather behavior directly from recent historical observations. Rather than applying a single universal model trained on static external datasets, AuraCast trains a customized model on the fly for the <strong>exact geographic coordinates</strong> requested by the user.
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2">
+                    <h3 class="text-xs font-semibold text-sky-300 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        What the Model Does
+                    </h3>
+                    <p class="text-xs text-slate-400">
+                        Ingests the past 30 days of hourly climate observations for a location, extracts cyclical diurnal patterns, atmospheric pressure tendencies, and lagged momentum features, and computes:
+                    </p>
+                    <ul class="list-disc list-inside text-xs text-slate-300 space-y-1 pt-1">
+                        <li><strong>24-Hour Rain Probability:</strong> Calibrated risk percentage (0–100%) and risk tier.</li>
+                        <li><strong>6-Hour Meteorological Trajectory:</strong> Predicted hourly temperature and humidity.</li>
+                        <li><strong>Model Validation Report:</strong> Real-time validation metrics on held-out test data.</li>
+                    </ul>
+                </div>
+                <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2">
+                    <h3 class="text-xs font-semibold text-emerald-300 flex items-center gap-1.5">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Observation vs. Prediction
+                    </h3>
+                    <p class="text-xs text-slate-400">
+                        It is critical to distinguish between the two distinct data streams in AuraCast:
+                    </p>
+                    <ul class="list-disc list-inside text-xs text-slate-300 space-y-1 pt-1">
+                        <li><strong>Current Weather (OpenWeather):</strong> Live instantaneous physical telemetry (thermometers, barometers, radar).</li>
+                        <li><strong>Predictive ML (Scikit-Learn):</strong> Statistical estimators trained on 30-day temporal lag relationships.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         3. DATA SOURCES
+         ========================================================================= -->
+    <section id="section-data-sources" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 2
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Data Sources & Ingestion</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            The application relies on two decoupled meteorological APIs, each serving a dedicated purpose in the progressive loading architecture:
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- OpenWeather -->
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">OpenWeather API</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20 font-mono">Live Telemetry</span>
+                </div>
+                <p class="text-xs text-slate-400">
+                    Provides instantaneous real-time current weather metrics. Delivers data in ~150ms to populate the top Hero section and Atmospheric indicators without blocking on ML processing.
+                </p>
+                <div class="text-[11px] font-mono text-slate-300 bg-[#111724] p-2.5 rounded-lg border border-white/[0.04] space-y-0.5">
+                    <div>• Temperature & Feels-Like</div>
+                    <div>• Humidity & Atmospheric Pressure</div>
+                    <div>• Wind Speed, Gusts & Direction</div>
+                    <div>• Cloud Cover & Visibility</div>
+                    <div>• Astronomical Sunrise & Sunset</div>
+                </div>
+            </div>
+
+            <!-- Open-Meteo -->
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-white">Open-Meteo Archive API</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 font-mono">Training Dataset</span>
+                </div>
+                <p class="text-xs text-slate-400">
+                    Retrieves 30 days (720 hourly chronological records) of local weather history for the exact coordinate pair. This dataset serves as the training corpus for the Random Forest pipeline.
+                </p>
+                <div class="text-[11px] font-mono text-slate-300 bg-[#111724] p-2.5 rounded-lg border border-white/[0.04] space-y-0.5">
+                    <div>• Hourly 2m Temperature (`temperature_2m`)</div>
+                    <div>• Relative Humidity (`relative_humidity_2m`)</div>
+                    <div>• Surface Pressure (`surface_pressure`)</div>
+                    <div>• Total Precipitation & Rain (`precipitation`, `rain`)</div>
+                    <div>• Wind Speed & Wind Direction (10m)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         4. DATA PREPARATION & PREPROCESSING
+         ========================================================================= -->
+    <section id="section-preprocessing" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 3
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Data Preprocessing & Validation</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Implemented in <code class="text-sky-300 bg-[#172032] px-1.5 py-0.5 rounded font-mono text-xs">app/ml/preprocessing.py</code>, raw time-series data undergoes strict data-cleaning rules before being passed to feature engineering:
+        </p>
+        <div class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                <div class="bg-[#172032] border border-white/[0.06] p-3.5 rounded-xl">
+                    <span class="text-sky-400 font-semibold block mb-1">1. Chronological Sorting</span>
+                    <p class="text-slate-400 text-[11px]">Timestamps are converted to native pandas datetimes and sorted chronologically to maintain time-series integrity.</p>
+                </div>
+                <div class="bg-[#172032] border border-white/[0.06] p-3.5 rounded-xl">
+                    <span class="text-sky-400 font-semibold block mb-1">2. Gap Imputation</span>
+                    <p class="text-slate-400 text-[11px]">Forward-fill (<code class="text-slate-300 font-mono">ffill</code>) followed by backward-fill (<code class="text-slate-300 font-mono">bfill</code>) ensures continuous sensor timelines without dropped hours.</p>
+                </div>
+                <div class="bg-[#172032] border border-white/[0.06] p-3.5 rounded-xl">
+                    <span class="text-sky-400 font-semibold block mb-1">3. Physical Bounds Clipping</span>
+                    <p class="text-slate-400 text-[11px]">Relative humidity is bounded strictly to $[0, 100]\%$; precipitation and wind speeds are clamped at $\ge 0.0$.</p>
+                </div>
+                <div class="bg-[#172032] border border-white/[0.06] p-3.5 rounded-xl">
+                    <span class="text-sky-400 font-semibold block mb-1">4. Target Generation</span>
+                    <p class="text-slate-400 text-[11px]">Constructs 24h rolling forward precipitation target and 6 multi-horizon future targets ($+1\text{h}$ to $+6\text{h}$).</p>
+                </div>
+            </div>
+
+            <!-- Code formulation sample -->
+            <div class="bg-[#090D14] border border-white/[0.06] rounded-xl p-4 font-mono text-xs text-slate-300 space-y-1 overflow-x-auto">
+                <div class="text-slate-500">// Target Definition in preprocessing.py</div>
+                <div><span class="text-purple-400">rolling_forward_precip</span> = df[<span class="text-emerald-300">"precipitation"</span>].iloc[::-<span class="text-amber-300">1</span>].rolling(window=<span class="text-amber-300">24</span>, min_periods=<span class="text-amber-300">1</span>).sum().iloc[::-<span class="text-amber-300">1</span>]</div>
+                <div>df[<span class="text-emerald-300">"target_rain_next_24h"</span>] = (rolling_forward_precip &gt; <span class="text-amber-300">0.2</span>).astype(int)</div>
+                <div class="pt-1"><span class="text-purple-400">for</span> h <span class="text-purple-400">in</span> range(<span class="text-amber-300">1</span>, <span class="text-amber-300">7</span>):</div>
+                <div class="pl-4">df[<span class="text-emerald-300">f"target_temp_h{h}"</span>] = df[<span class="text-emerald-300">"temperature"</span>].shift(-h)</div>
+                <div class="pl-4">df[<span class="text-emerald-300">f"target_hum_h{h}"</span>] = df[<span class="text-emerald-300">"humidity"</span>].shift(-h)</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         5. FEATURE ENGINEERING
+         ========================================================================= -->
+    <section id="section-features" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 4
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Feature Engineering Matrix</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Raw meteorological readings are transformed into <strong>30 structured feature columns</strong> in <code class="text-sky-300 bg-[#172032] px-1.5 py-0.5 rounded font-mono text-xs">app/ml/features.py</code> to provide the model with historical momentum, cyclical timing, and physical atmospheric relationships:
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+            <!-- 1. Cyclical Harmonics -->
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2">
+                <span class="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+                    Cyclical Time Signals
+                </span>
+                <p class="text-xs text-slate-400">
+                    Converts standard hour-of-day and month-of-year into continuous trigonometric signals so the model recognizes that 23:00 and 00:00 are adjacent:
+                </p>
+                <div class="bg-[#111724] p-2.5 rounded-lg border border-white/[0.04] text-[11px] font-mono text-slate-300">
+                    <div>sin_hour = sin(2π × hour / 24)</div>
+                    <div>cos_hour = cos(2π × hour / 24)</div>
+                    <div>sin_month = sin(2π × (month - 1) / 12)</div>
+                    <div>cos_month = cos(2π × (month - 1) / 12)</div>
+                </div>
+            </div>
+
+            <!-- 2. Derived Meteorological Indices -->
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2">
+                <span class="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                    Physical & Vector Features
+                </span>
+                <p class="text-xs text-slate-400">
+                    Extracts thermodynamic dew point approximations and decomposes polar wind vectors into orthogonal East-West ($U$) and North-South ($V$) components:
+                </p>
+                <div class="bg-[#111724] p-2.5 rounded-lg border border-white/[0.04] text-[11px] font-mono text-slate-300">
+                    <div>dew_point = temp - ((100 - humidity) / 5)</div>
+                    <div>wind_u = -speed × sin(radians(direction))</div>
+                    <div>wind_v = -speed × cos(radians(direction))</div>
+                </div>
+            </div>
+
+            <!-- 3. Time-Lag Observations -->
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2">
+                <span class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    Time-Lag Features (Inertia)
+                </span>
+                <p class="text-xs text-slate-400">
+                    Injects past observations to capture thermal and moisture inertia over preceding hours:
+                </p>
+                <div class="bg-[#111724] p-2.5 rounded-lg border border-white/[0.04] text-[11px] font-mono text-slate-300">
+                    <div>temp_lag_1h, temp_lag_2h, temp_lag_3h, temp_lag_6h</div>
+                    <div>hum_lag_1h, hum_lag_2h, hum_lag_3h, hum_lag_6h</div>
+                    <div>press_lag_1h, press_lag_3h, precip_lag_1h</div>
+                </div>
+            </div>
+
+            <!-- 4. Rolling Aggregations & Tendency -->
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2">
+                <span class="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+                    Rolling Aggregations & Pressure Trend
+                </span>
+                <p class="text-xs text-slate-400">
+                    Quantifies short-term trends and volatility. Crucially, computes the 3-hour barometric pressure drop ($\Delta P_{3h}$), a primary sign of incoming storm fronts:
+                </p>
+                <div class="bg-[#111724] p-2.5 rounded-lg border border-white/[0.04] text-[11px] font-mono text-slate-300">
+                    <div>temp_roll_mean_6h, temp_roll_std_6h, temp_roll_mean_24h</div>
+                    <div>hum_roll_mean_6h, hum_roll_mean_24h</div>
+                    <div>press_trend_3h = pressure - pressure(t - 3h)</div>
+                    <div>precip_accum_24h = sum(precipitation, 24h)</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         6. MACHINE LEARNING MODELS
+         ========================================================================= -->
+    <section id="section-ml-models" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-5">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 5
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Machine Learning Models & Algorithms</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            AuraCast utilizes <strong>Ensemble Random Forest</strong> architectures implemented with Scikit-Learn (<code class="text-sky-300 bg-[#172032] px-1.5 py-0.5 rounded font-mono text-xs">app/ml/models.py</code>). Random Forests construct an ensemble of randomized decision trees that vote (for classification) or average (for regression), drastically mitigating overfitting:
+        </p>
+
+        <div class="space-y-4">
+            <!-- Rain Classifier -->
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 sm:p-5 space-y-2.5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                        Precipitation Classifier: <code class="font-mono text-emerald-300 text-xs">RandomForestClassifier</code>
+                    </h3>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">Binary Probability</span>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Trained to predict whether total precipitation over the next 24-hour window will exceed $0.2\text{ mm}$. Uses <strong>balanced class weighting</strong> (<code class="text-slate-300 font-mono">class_weight="balanced"</code>) so that dry seasons with rare rainfall events are not ignored by the loss function. Computes continuous probability via <code class="text-slate-300 font-mono">predict_proba(X)</code>.
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] font-mono pt-1 text-slate-300">
+                    <div class="bg-[#111724] p-2 rounded border border-white/[0.04]">n_estimators: <strong>45</strong></div>
+                    <div class="bg-[#111724] p-2 rounded border border-white/[0.04]">max_depth: <strong>6</strong></div>
+                    <div class="bg-[#111724] p-2 rounded border border-white/[0.04]">min_samples_split: <strong>4</strong></div>
+                    <div class="bg-[#111724] p-2 rounded border border-white/[0.04]">class_weight: <strong>balanced</strong></div>
+                </div>
+            </div>
+
+            <!-- Multi-Horizon Temperature & Humidity Regressors -->
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 sm:p-5 space-y-2.5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+                        Multi-Horizon Hourly Regressors: <code class="font-mono text-cyan-300 text-xs">RandomForestRegressor (×12)</code>
+                    </h3>
+                    <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">Direct Multi-Step Forecasting</span>
+                </div>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                    Rather than compounding error through recursive autoregression, AuraCast fits <strong>independent direct-horizon estimators</strong> for each subsequent hour ($+1\text{h}, +2\text{h}, \dots, +6\text{h}$) across both temperature and humidity.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
+                    <div class="bg-[#111724] p-3 rounded-lg border border-white/[0.04] space-y-1">
+                        <span class="text-sky-300 font-semibold text-[11px] block">6× Temperature Models</span>
+                        <p class="text-slate-400 text-[11px]">Separate tree ensembles fitted to predict exact Celsius temperature at target horizons $h \in \{1, 2, 3, 4, 5, 6\}$.</p>
+                    </div>
+                    <div class="bg-[#111724] p-3 rounded-lg border border-white/[0.04] space-y-1">
+                        <span class="text-cyan-300 font-semibold text-[11px] block">6× Humidity Models</span>
+                        <p class="text-slate-400 text-[11px]">Separate tree ensembles predicting relative humidity percentages clipped to $[0, 100]\%$ at target horizons $h \in \{1, 2, 3, 4, 5, 6\}$.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         7. PREDICTION FLOW
+         ========================================================================= -->
+    <section id="section-prediction-flow" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 6
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Step-by-Step Prediction Lifecycle</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            What happens from the moment a user submits a city search or GPS location:
+        </p>
+
+        <div class="space-y-2.5 text-xs">
+            <div class="flex items-start gap-3 bg-[#172032] p-3 rounded-xl border border-white/[0.05]">
+                <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-300 font-bold flex items-center justify-center shrink-0 text-[11px]">1</span>
+                <div>
+                    <strong class="text-white">Geographic Coordinate Resolution:</strong>
+                    <span class="text-slate-400 ml-1">The location search endpoint geocodes the query string to high-precision latitude/longitude coordinates.</span>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-[#172032] p-3 rounded-xl border border-white/[0.05]">
+                <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-300 font-bold flex items-center justify-center shrink-0 text-[11px]">2</span>
+                <div>
+                    <strong class="text-white">Instant OpenWeather Dispatch (~150ms):</strong>
+                    <span class="text-slate-400 ml-1">Live observation is rendered immediately on the UI. The prediction cards transition to dark-shimmer skeleton states.</span>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-[#172032] p-3 rounded-xl border border-white/[0.05]">
+                <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-300 font-bold flex items-center justify-center shrink-0 text-[11px]">3</span>
+                <div>
+                    <strong class="text-white">Historical Telemetry Retrieval:</strong>
+                    <span class="text-slate-400 ml-1">Open-Meteo archive API fetches ~720 hourly records specific to the coordinate pair.</span>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-[#172032] p-3 rounded-xl border border-white/[0.05]">
+                <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-300 font-bold flex items-center justify-center shrink-0 text-[11px]">4</span>
+                <div>
+                    <strong class="text-white">Data Cleansing & Feature Construction:</strong>
+                    <span class="text-slate-400 ml-1">Data is sanitized, time-lagged, rolling-window aggregated, and encoded into a 30-column feature matrix.</span>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-[#172032] p-3 rounded-xl border border-white/[0.05]">
+                <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-300 font-bold flex items-center justify-center shrink-0 text-[11px]">5</span>
+                <div>
+                    <strong class="text-white">Chronological Validation & Model Fitting:</strong>
+                    <span class="text-slate-400 ml-1">An 80/20 temporal split validates accuracy, followed by tree fitting across all 13 estimators.</span>
+                </div>
+            </div>
+
+            <div class="flex items-start gap-3 bg-[#172032] p-3 rounded-xl border border-white/[0.05]">
+                <span class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-300 font-bold flex items-center justify-center shrink-0 text-[11px]">6</span>
+                <div>
+                    <strong class="text-white">Inference & Targeted DOM Replacement:</strong>
+                    <span class="text-slate-400 ml-1">The final prediction bundle arrives via <code class="text-slate-300 font-mono">/api/prediction</code>, replacing solely the prediction skeletons with live gauges and charts.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         8. FORECAST / PREDICTION EXPLANATION
+         ========================================================================= -->
+    <section id="section-forecast-interpretation" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 7
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Interpreting Model Output</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2">
+                <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+                    24-Hour Rain Probability & Risk Tiers
+                </h3>
+                <p class="text-slate-400 leading-relaxed">
+                    The precipitation gauge score represents the probability of measurable precipitation ($\ge 0.2\text{ mm}$) over the next 24 hours:
+                </p>
+                <div class="space-y-1.5 pt-1">
+                    <div class="flex items-center justify-between p-1.5 rounded bg-[#111724] border border-white/[0.04]">
+                        <span class="text-emerald-300 font-medium">Low Risk (&lt; 20%)</span>
+                        <span class="text-slate-400 text-[11px]">Dry conditions expected.</span>
+                    </div>
+                    <div class="flex items-center justify-between p-1.5 rounded bg-[#111724] border border-white/[0.04]">
+                        <span class="text-amber-300 font-medium">Moderate Risk (20% – 49%)</span>
+                        <span class="text-slate-400 text-[11px]">Isolated light showers possible.</span>
+                    </div>
+                    <div class="flex items-center justify-between p-1.5 rounded bg-[#111724] border border-white/[0.04]">
+                        <span class="text-rose-300 font-medium">High Risk (50% – 79%)</span>
+                        <span class="text-slate-400 text-[11px]">High likelihood of sustained rainfall.</span>
+                    </div>
+                    <div class="flex items-center justify-between p-1.5 rounded bg-[#111724] border border-white/[0.04]">
+                        <span class="text-purple-300 font-medium">Very High Risk (≥ 80%)</span>
+                        <span class="text-slate-400 text-[11px]">Imminent or heavy precipitation.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2">
+                <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                    6-Hour Trajectory Strip
+                </h3>
+                <p class="text-slate-400 leading-relaxed">
+                    Displays predicted temperature, humidity, and condition classification for each upcoming hour ($+1\text{h}$ through $+6\text{h}$). Estimated conditions are derived from the joint distribution of predicted moisture and thermal values:
+                </p>
+                <div class="space-y-1.5 pt-1">
+                    <div class="flex items-center justify-between p-1.5 rounded bg-[#111724] border border-white/[0.04]">
+                        <span class="text-sky-300 font-mono">Rainy</span>
+                        <span class="text-slate-400 text-[11px]">Rain prob &gt; 60% & Humidity &gt; 75%</span>
+                    </div>
+                    <div class="flex items-center justify-between p-1.5 rounded bg-[#111724] border border-white/[0.04]">
+                        <span class="text-slate-300 font-mono">Cloudy</span>
+                        <span class="text-slate-400 text-[11px]">Humidity &gt; 70%</span>
+                    </div>
+                    <div class="flex items-center justify-between p-1.5 rounded bg-[#111724] border border-white/[0.04]">
+                        <span class="text-amber-300 font-mono">Warm / Clear</span>
+                        <span class="text-slate-400 text-[11px]">Temperature &gt; 28°C</span>
+                    </div>
+                    <div class="flex items-center justify-between p-1.5 rounded bg-[#111724] border border-white/[0.04]">
+                        <span class="text-slate-400 font-mono">Clear</span>
+                        <span class="text-slate-400 text-[11px]">Standard baseline</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         9. MODEL LIMITATIONS
+         ========================================================================= -->
+    <section id="section-limitations" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-rose-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+            Section 8
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Scientific Model Limitations</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Meteorological modeling involves chaotic fluid dynamics and complex boundary conditions. For complete transparency, users should understand these constraints:
+        </p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-xs">
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3.5 space-y-1">
+                <span class="text-rose-400 font-semibold block">Historical Data Quality</span>
+                <p class="text-slate-400 text-[11px]">Predictions are bounded by the observational fidelity and station density of Open-Meteo reanalysis data for the selected coordinates.</p>
+            </div>
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3.5 space-y-1">
+                <span class="text-rose-400 font-semibold block">Sudden Extreme Convective Events</span>
+                <p class="text-slate-400 text-[11px]">Microbursts, isolated severe thunderstorms, or rapid frontal collapses can develop faster than a 30-day statistical pattern reflects.</p>
+            </div>
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3.5 space-y-1">
+                <span class="text-rose-400 font-semibold block">Microclimate & Topography</span>
+                <p class="text-slate-400 text-[11px]">Urban heat island effects, coastal sea-breeze fronts, and sharp mountain rain shadows may produce localized variance.</p>
+            </div>
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3.5 space-y-1">
+                <span class="text-rose-400 font-semibold block">No Future Guarantee</span>
+                <p class="text-slate-400 text-[11px]">Statistical patterns from the past 30 days do not guarantee future weather; atmospheric shifts can alter localized dynamics.</p>
+            </div>
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3.5 space-y-1">
+                <span class="text-rose-400 font-semibold block">Horizon Degradation</span>
+                <p class="text-slate-400 text-[11px]">Prediction uncertainty increases as the forecast horizon extends from $+1\text{h}$ toward $+6\text{h}$ and beyond.</p>
+            </div>
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3.5 space-y-1">
+                <span class="text-rose-400 font-semibold block">Upstream API Availability</span>
+                <p class="text-slate-400 text-[11px]">If the historical archive API is unreachable, ML predictions gracefully fail while live OpenWeather observations remain usable.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         10. MODEL EVALUATION & VALIDATION
+         ========================================================================= -->
+    <section id="section-evaluation" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 9
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Real-Time Validation Metrics</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Every time a model is fitted, it evaluates itself on held-out observations using a strict <strong>80/20 Chronological Split</strong>. This avoids lookahead bias (training on future samples to predict past samples):
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2.5">
+                <h3 class="text-xs font-bold text-sky-300">Regression Metrics (Temperature & Humidity)</h3>
+                <div class="space-y-1.5">
+                    <div class="bg-[#111724] p-2.5 rounded-lg border border-white/[0.04]">
+                        <div class="flex justify-between font-mono">
+                            <span class="text-slate-200">MAE (Mean Absolute Error)</span>
+                            <span class="text-sky-400">|y - ŷ|</span>
+                        </div>
+                        <p class="text-slate-400 text-[11px] mt-0.5">Average magnitude of errors in raw physical units (°C or % relative humidity).</p>
+                    </div>
+                    <div class="bg-[#111724] p-2.5 rounded-lg border border-white/[0.04]">
+                        <div class="flex justify-between font-mono">
+                            <span class="text-slate-200">RMSE (Root Mean Squared Error)</span>
+                            <span class="text-sky-400">√((y - ŷ)²)</span>
+                        </div>
+                        <p class="text-slate-400 text-[11px] mt-0.5">Penalizes large outlier forecast errors more heavily than small deviations.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-4 space-y-2.5">
+                <h3 class="text-xs font-bold text-emerald-300">Classification Metrics (Rain Occurrence)</h3>
+                <div class="space-y-1.5">
+                    <div class="bg-[#111724] p-2.5 rounded-lg border border-white/[0.04]">
+                        <div class="flex justify-between font-mono">
+                            <span class="text-slate-200">Accuracy & F1-Score</span>
+                            <span class="text-emerald-400">Harmonic Mean</span>
+                        </div>
+                        <p class="text-slate-400 text-[11px] mt-0.5">F1-score measures harmonic mean of precision and recall to assess performance on unbalanced rain days.</p>
+                    </div>
+                    <div class="bg-[#111724] p-2.5 rounded-lg border border-white/[0.04]">
+                        <div class="flex justify-between font-mono">
+                            <span class="text-slate-200">Precision & Recall</span>
+                            <span class="text-emerald-400">TP / (TP + FP)</span>
+                        </div>
+                        <p class="text-slate-400 text-[11px] mt-0.5">Evaluates false alarm rate vs. missed rainfall detection rates.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================================================
+         11. TECHNICAL DETAILS & STACK
+         ========================================================================= -->
+    <section id="section-tech-stack" class="bg-[#111724] border border-white/[0.07] rounded-2xl p-6 sm:p-7 shadow-lg space-y-4">
+        <div class="flex items-center gap-2 text-sky-400 text-xs font-semibold uppercase tracking-wider">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            Section 10
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold text-white tracking-tight">Technical Specifications & Stack</h2>
+        <p class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+            Concrete summary of technologies powering the AuraCast production architecture:
+        </p>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-xs">
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Backend Framework</span>
+                <strong class="text-white text-xs block mt-0.5">FastAPI</strong>
+                <span class="text-[11px] text-sky-300">Asynchronous ASGI</span>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Template & UI</span>
+                <strong class="text-white text-xs block mt-0.5">Jinja2 & Tailwind</strong>
+                <span class="text-[11px] text-sky-300">Server-Side + Vanilla JS</span>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Live Weather Ingestion</span>
+                <strong class="text-white text-xs block mt-0.5">OpenWeather API</strong>
+                <span class="text-[11px] text-sky-300">Current Weather Telemetry</span>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Historical Weather</span>
+                <strong class="text-white text-xs block mt-0.5">Open-Meteo Archive</strong>
+                <span class="text-[11px] text-sky-300">30-Day Hourly Archive</span>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Machine Learning</span>
+                <strong class="text-white text-xs block mt-0.5">Scikit-Learn</strong>
+                <span class="text-[11px] text-emerald-300">Random Forest Ensemble</span>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Data Processing</span>
+                <strong class="text-white text-xs block mt-0.5">Pandas & NumPy</strong>
+                <span class="text-[11px] text-emerald-300">Time-Series Sanitization</span>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Visualizations</span>
+                <strong class="text-white text-xs block mt-0.5">Chart.js 4.4</strong>
+                <span class="text-[11px] text-amber-300">Canvas Interactive Trends</span>
+            </div>
+
+            <div class="bg-[#172032] border border-white/[0.06] rounded-xl p-3">
+                <span class="text-[10px] text-slate-400 uppercase tracking-wider block">Deployment</span>
+                <strong class="text-white text-xs block mt-0.5">Vercel Serverless</strong>
+                <span class="text-[11px] text-purple-300">`api/index.py` Handler</span>
+            </div>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

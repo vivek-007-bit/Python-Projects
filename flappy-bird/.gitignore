@@ -1,5 +1,5 @@
 # ==============================================================================
-# Git Ignore Configuration for Flappy Bird (Python + Pygame-ce + pygbag + Render)
+# Git Ignore Configuration for Flappy Bird (Python + Pygame-ce + pygbag + Vercel)
 # ==============================================================================
 
 # ------------------------------------------------------------------------------
@@ -35,10 +35,10 @@ htmlcov/
 .nox/
 
 # ------------------------------------------------------------------------------
-# Pygbag Build Artifacts
-# (Render automatically builds 'build/web/' from source during deployment)
+# Pygbag Build Caches
+# (Keep 'build/web/' for Vercel deployment, ignore intermediate hash caches)
 # ------------------------------------------------------------------------------
-build/
+build/web-cache/
 .pygbag/
 
 # ------------------------------------------------------------------------------
