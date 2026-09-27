@@ -42,8 +42,8 @@ Browser Client
    └── Web Audio API & Particle Systems
          │
          ▼ (HTTP / Static Requests)
-FastAPI Server / Vercel Serverless
-   ├── api/index.py (Serverless ASGI entrypoint)
+FastAPI Server / Vercel Zero-Config
+   ├── main.py (Root ASGI discovery entrypoint)
    ├── app/main.py (FastAPI App & Static asset mounts)
    └── app/templates/index.html (Jinja2 Template)
 ```
@@ -51,15 +51,15 @@ FastAPI Server / Vercel Serverless
 ### Project Structure
 
 ```text
-Flappy-Bird-FastAPI/
-├── api/
-│   └── index.py            # Vercel Serverless ASGI entrypoint
+Flappy-Bird/
+├── main.py                 # Root ASGI discovery entrypoint
+├── pyproject.toml          # Vercel entrypoint configuration
 ├── app/
 │   ├── __init__.py
 │   ├── main.py             # FastAPI application & static mount
 │   ├── routes/
 │   │   ├── __init__.py
-│   │   └── game.py         # Primary route handler
+│   │   └── game.py         # Primary route handler & favicon
 │   ├── templates/
 │   │   └── index.html      # Jinja2 Canvas template
 │   └── static/
@@ -71,9 +71,7 @@ Flappy-Bird-FastAPI/
 │           ├── images/     # Sprites (bird, pipe, background, ground)
 │           └── sounds/     # Audio effects (flap, point, hit, die)
 ├── requirements.txt        # fastapi, uvicorn, jinja2
-├── vercel.json             # Vercel deployment configuration
 ├── .gitignore              # Git ignore rules
-├── MIGRATION_NOTES.md      # Detailed reverse engineering & physics specifications
 └── README.md
 ```
 
@@ -127,13 +125,13 @@ Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your web browser.
 
 ## ☁️ Deployment to Vercel
 
-This project is configured for direct deployment on **Vercel**:
+This project is configured for seamless zero-configuration deployment on **Vercel**:
 
 ### Option A: Deploy via GitHub (Recommended)
 1. Push this repository to GitHub.
 2. Go to [vercel.com](https://vercel.com) and click **"Add New Project"**.
 3. Select your repository.
-4. Vercel will automatically detect `api/index.py` and deploy the FastAPI application using the Python Serverless runtime.
+4. Vercel automatically detects the FastAPI application from `pyproject.toml` and `main.py`, serving both the HTML5 Canvas game and static assets natively.
 
 ### Option B: Deploy via Vercel CLI
 ```bash
