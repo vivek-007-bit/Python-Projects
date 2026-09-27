@@ -89,3 +89,23 @@ async def test_prediction_bundle_api():
         assert "historical" in data
         assert 0.0 <= data["prediction"]["rain_probability_next_24h"] <= 100.0
 
+
+@pytest.mark.asyncio
+async def test_static_assets_serving():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        # Test CSS
+        css_resp = await client.get("/static/css/custom.css")
+        assert css_resp.status_code == 200
+        assert "skeleton" in css_resp.text
+
+        # Test JS
+        js_resp = await client.get("/static/js/app.js")
+        assert js_resp.status_code == 200
+        assert "DOMContentLoaded" in js_resp.text
+
+        # Test SVG Icon
+        icon_resp = await client.get("/static/icons/cloudy.svg")
+        assert icon_resp.status_code == 200
+        assert "<svg" in icon_resp.text
+
+
