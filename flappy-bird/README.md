@@ -1,83 +1,88 @@
-# 🐦 Flappy Bird - Python + Pygame + WebAssembly
+# 🐦 Flappy Bird — Web-Native Edition (FastAPI + HTML5 Canvas)
 
-A complete, polished **Flappy Bird** game built with **Python** and **pygame-ce**, packaged for modern web browsers via **pygbag / WebAssembly**, and ready for instant deployment to **Vercel**.
+A complete, high-performance web-native **Flappy Bird** arcade game built with **FastAPI**, **HTML5 Canvas**, **Vanilla JavaScript**, and **CSS3**. 
+
+Designed for instant browser loading at 60 FPS without heavy WebAssembly or Pygame emulators, and architected for seamless zero-config deployment to **Vercel**.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Features & Mechanics
 
-* **Authentic Physics & Controls:** Smooth gravity, instantaneous flap impulse, and fluid pitch tilt based on vertical velocity.
-* **Dual-Platform Architecture:** Runs as a native desktop application or as a WebAssembly browser game.
-* **Responsive Aspect-Ratio Scaling:** Renders at a logical $400 \times 700$ resolution and scales dynamically to any desktop, tablet, or mobile viewport with letterboxing.
-* **First-Class Mobile Touch & Desktop Inputs:**
-  * **Desktop:** Spacebar, Up Arrow, Left Mouse Click.
-  * **Mobile:** Tap anywhere on the viewport.
-  * **Utility Keys:** `P` / `Esc` for Pause, `M` for Mute/Unmute.
-* **Clean State Management:** Robust transitions between `MENU`, `PLAYING`, `PAUSED`, and `GAME_OVER`.
-* **Visual Polish & Effects:**
-  * Multi-frame animated bird wings.
-  * Parallax scrolling sky background and seamless ground animation.
-  * Flap dust puffs, golden score sparkle bursts, floating "+1" popups, and impact feather bursts.
-  * Subtle screen-shake and hit flash feedback on collision.
-  * Arcade medal awards (Bronze, Silver, Gold, Platinum) based on achieved scores.
-* **Robust Sound System:** Safe PCM audio engine with sound effects for flap, score, collision, and game over, complete with in-game mute toggle and graceful audio fallbacks.
-* **High Score Persistence:** Local storage / session best score tracking.
+* **Authentic 60 FPS Physics**:
+  * Gravity: $0.42\text{ px/frame}^2$
+  * Flap Impulse: $-8.2\text{ px/frame}$ upward velocity
+  * Terminal Velocity: $10.5\text{ px/frame}$
+  * Fluid pitch rotation: Tilts upward on jump ($+28^\circ$) and pitches down into a dive smoothly (up to $-85^\circ$).
+* **Exact Dimensions & Scaling**:
+  * Logical $400 \times 700$ px resolution.
+  * Responsive aspect-ratio letterboxing adapting cleanly to desktop, laptop, tablet, and mobile screens.
+* **Sprite Animation & Environments**:
+  * 3-frame animated flapping bird wings.
+  * Parallax scrolling sky background ($0.6\text{ px/frame}$) and seamless scrolling ground ($3.0\text{ px/frame}$).
+  * Inset collision hitboxes for forgiving, fair gameplay.
+* **Visual Polish & Particles**:
+  * Flap dust puffs, golden score sparkles, and floating "+1" score indicators.
+  * Screen-shake ($10\text{ px}$ impact) and hit flash effects on collision.
+  * Feather bursts upon game over.
+* **Medals & High Scores**:
+  * Arcade Medals: **Bronze** ($\ge 10$), **Silver** ($\ge 20$), **Gold** ($\ge 30$), and **Platinum** ($\ge 40$).
+  * Persistent high score tracking via browser `localStorage`.
+* **Sound Engine**:
+  * Web Audio API & HTML5 Audio with fallback sound synthesizer for zero-latency flap, point, hit, and die sound effects.
+  * Interactive on-canvas mute toggle (`M`) and pause toggle (`P` / `Esc`).
 
 ---
 
 ## 🏗️ Architecture & Technology Stack
 
 ```text
-Python 3 (pygame-ce)
-        ↓
-    pygbag
-        ↓
- WebAssembly (Wasm)
-        ↓
-  Modern Browser
-        ↓
- Vercel Static CDN
+Browser Client
+   ├── HTML5 Canvas (Logical 400x700 2D context)
+   ├── Vanilla JavaScript Game Loop (requestAnimationFrame)
+   └── Web Audio API & Particle Systems
+         │
+         ▼ (HTTP / Static Requests)
+FastAPI Server / Vercel Serverless
+   ├── api/index.py (Serverless ASGI entrypoint)
+   ├── app/main.py (FastAPI App & Static asset mounts)
+   └── app/templates/index.html (Jinja2 Template)
 ```
 
 ### Project Structure
 
 ```text
-Flappy Bird/
-├── build/
-│   └── web/                   # Generated WebAssembly browser package
-│       ├── index.html
-│       ├── favicon.png
-│       ├── flappy.bird.apk
-│       └── flappy.bird.tar.gz
-├── game/
-│   ├── assets/
-│   │   ├── images/            # Sprites (bird, pipe, background, ground)
-│   │   └── sounds/            # WebAssembly-compatible OGG audio (flap, point, hit, die)
+Flappy-Bird-FastAPI/
+├── api/
+│   └── index.py            # Vercel Serverless ASGI entrypoint
+├── app/
 │   ├── __init__.py
-│   ├── game.py                # State machine, UI rendering, score, polish
-│   ├── main.py                # Main async game loop & viewport scaler
-│   ├── particles.py           # Particle effects & floating text popups
-│   ├── pipe.py                # Pipe obstacle manager & collision boxes
-│   ├── player.py              # Bird physics, rotation, & animation frames
-│   ├── settings.py            # Global constants & game configuration
-│   └── sound_manager.py       # Audio loading, volume, & mute controller
-├── tests/
-│   └── test_game.py           # Automated unit test suite
-├── tools/
-│   └── generate_assets.py     # Asset & audio synthesizer script
-├── build.py                   # Pygbag build script
-├── main.py                    # Root entry point
-├── requirements.txt           # Python dependencies (pygame-ce, pygbag)
-├── vercel.json                # Vercel static hosting configuration
+│   ├── main.py             # FastAPI application & static mount
+│   ├── routes/
+│   │   ├── __init__.py
+│   │   └── game.py         # Primary route handler
+│   ├── templates/
+│   │   └── index.html      # Jinja2 Canvas template
+│   └── static/
+│       ├── css/
+│       │   └── game.css    # Responsive arcade styling
+│       ├── js/
+│       │   └── game.js     # 60 FPS HTML5 Canvas engine
+│       └── assets/
+│           ├── images/     # Sprites (bird, pipe, background, ground)
+│           └── sounds/     # Audio effects (flap, point, hit, die)
+├── requirements.txt        # fastapi, uvicorn, jinja2
+├── vercel.json             # Vercel deployment configuration
+├── .gitignore              # Git ignore rules
+├── MIGRATION_NOTES.md      # Detailed reverse engineering & physics specifications
 └── README.md
 ```
 
 ---
 
-## 🚀 Quick Start (Local Development)
+## 🚀 Local Development
 
 ### 1. Prerequisites
-* Python 3.10+ (Python 3.11 - 3.14 supported)
+* Python 3.10+
 * `pip`
 
 ### 2. Setup Virtual Environment
@@ -99,124 +104,39 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### 4. Run Game Locally
+### 4. Run the Development Server
 
 ```bash
-python main.py
+uvicorn app.main:app --reload
 ```
-*(Or `python game/main.py`)*
+
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your web browser.
 
 ---
 
-## 🎮 Game Controls
+## 🎮 Controls
 
-| Action | Desktop Controls | Mobile / Touch |
+| Action | Desktop Keyboard / Mouse | Mobile / Tablet Touch |
 | :--- | :--- | :--- |
-| **Flap / Jump** | `Space`, `Up Arrow`, `Left Click` | `Tap anywhere` |
-| **Start / Restart** | `Space`, `Up Arrow`, `Left Click` | `Tap anywhere` |
+| **Flap / Jump** | `Spacebar`, `Up Arrow`, `Left Click` | `Tap anywhere on canvas` |
+| **Start / Restart** | `Spacebar`, `Up Arrow`, `Left Click` | `Tap anywhere on canvas` |
 | **Pause / Resume** | `P`, `Esc`, or Click `Pause Icon` | Tap `Pause Icon` (top-left) |
 | **Mute / Unmute** | `M` or Click `Speaker Icon` | Tap `Speaker Icon` (top-right) |
 
 ---
 
-## 🌐 Building for Web with Pygbag
-
-The project uses **pygbag** to compile the Python/Pygame codebase into WebAssembly.
-
-### Build the Web Package
-
-Run the provided build helper:
-```bash
-python build.py
-```
-Or directly via the CLI:
-```bash
-python -m pygbag --build .
-```
-
-This packages the application into the `build/web/` directory containing:
-* `index.html` (WebAssembly loader and HTML5 Canvas interface)
-* `flappy.bird.apk` / `flappy.bird.tar.gz` (Packaged assets and Python bytecode)
-* `favicon.png`
-
-### Test Web Build Locally
-
-To test the browser game locally in your browser with a live test server:
-```bash
-python -m pygbag .
-```
-Then navigate to `http://localhost:8000` in your web browser.
-
----
-
 ## ☁️ Deployment to Vercel
 
-Vercel serves the generated WebAssembly static build (`build/web/`) through its global edge CDN.
+This project is configured for direct deployment on **Vercel**:
 
-### Option A: Automated Git Deployment (Recommended)
-
-1. Push this repository to GitHub:
-   ```bash
-   git init
-   git add .
-   git commit -m "feat: complete Flappy Bird web game"
-   git remote add origin https://github.com/<your-username>/<repo-name>.git
-   git push -u origin main
-   ```
-2. Go to [Vercel Dashboard](https://vercel.com/dashboard) and click **"Add New Project"**.
-3. Import your GitHub repository.
-4. Vercel will automatically detect `vercel.json` and serve the `build/web` directory with the proper WebAssembly headers (`Cross-Origin-Opener-Policy` and `Cross-Origin-Embedder-Policy`).
-5. Click **Deploy**.
+### Option A: Deploy via GitHub (Recommended)
+1. Push this repository to GitHub.
+2. Go to [vercel.com](https://vercel.com) and click **"Add New Project"**.
+3. Select your repository.
+4. Vercel will automatically detect `api/index.py` and deploy the FastAPI application using the Python Serverless runtime.
 
 ### Option B: Deploy via Vercel CLI
-
 ```bash
-# Install Vercel CLI (if not already installed)
 npm install -g vercel
-
-# Build the WebAssembly bundle
-python build.py
-
-# Deploy to Vercel
-vercel --prod
+vercel
 ```
-
----
-
-## 🧪 Running Automated Tests
-
-Run the unit test suite to verify physics calculations, state transitions, pipe collisions, sound safety, and viewport mapping:
-
-```bash
-python -m unittest tests/test_game.py
-```
-
----
-
-## ⚙️ Configuration & Customization
-
-All gameplay constants are centralized in `game/settings.py`:
-
-```python
-GAME_WIDTH = 400            # Logical game canvas width
-GAME_HEIGHT = 700           # Logical game canvas height
-FPS = 60                    # Target frame rate
-
-GRAVITY = 0.42              # Bird downward gravitational pull
-FLAP_STRENGTH = -8.2        # Bird upward flap velocity
-MAX_FALL_SPEED = 10.5       # Terminal velocity
-
-PIPE_WIDTH = 70             # Width of green pipes
-PIPE_GAP = 175              # Vertical gap between top and bottom pipe
-PIPE_SPEED = 3.0            # Horizontal scroll speed
-PIPE_SPAWN_DISTANCE = 230   # Spacing between consecutive pipe pairs
-
-MASTER_VOLUME = 0.7         # Sound effects master volume
-```
-
----
-
-## 🛠️ Troubleshooting
-
-* **Black borders on screen:** This is the intentional aspect-ratio letterboxing ensuring the game retains its $400 \times 700$ geometry without distortion on wide or tall monitors.
-* **Audio disabled or silent:** Ensure sound is not muted in-game (press `M` or check the speaker icon). The game includes built-in fallbacks and will continue running smoothly even if host audio hardware is unavailable.

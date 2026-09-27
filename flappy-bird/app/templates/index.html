@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>{{ title }}</title>
+    <meta name="description" content="Play the classic Flappy Bird game natively in your browser with smooth 60 FPS Canvas physics and arcade sound effects.">
+    <link rel="icon" type="image/png" href="/static/assets/images/bird.png">
+    
+    <!-- Game Styling -->
+    <link rel="stylesheet" href="/static/css/game.css">
+</head>
+<body>
+    <main class="game-wrapper">
+        <div class="canvas-container" id="canvas-container">
+            <canvas id="game-canvas" width="400" height="700" tabindex="0"></canvas>
+            
+            <!-- Asset Loading Screen Overlay -->
+            <div id="loading-overlay" class="loading-overlay">
+                <div class="loading-card">
+                    <div class="loading-bird"></div>
+                    <div class="loading-title">FLAPPY BIRD</div>
+                    <div class="loading-bar-container">
+                        <div id="loading-bar" class="loading-bar"></div>
+                    </div>
+                    <div id="loading-text" class="loading-text">Loading game assets...</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Vanilla JavaScript Game Engine -->
+    <script src="/static/js/game.js"></script>
+</body>
+</html>

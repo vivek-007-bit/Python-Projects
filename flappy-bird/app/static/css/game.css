@@ -1,0 +1,149 @@
+/* ==============================================================================
+   Flappy Bird Web Edition — Game Styling
+   ============================================================================== */
+
+:root {
+    --bg-color: #1a222c;
+    --card-bg: #ebdcb9;
+    --card-border: #735028;
+    --gold: #ffd700;
+    --sky-blue: #64c3dc;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    font-family: 'Trebuchet MS', 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.game-wrapper {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #263445 0%, #121820 100%);
+    padding: 10px;
+}
+
+.canvas-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: calc(100vh * (400 / 700));
+    max-height: calc(100vw * (700 / 400));
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 400 / 700;
+    background-color: var(--sky-blue);
+}
+
+#game-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    outline: none;
+    touch-action: none;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+    background-color: transparent;
+    cursor: pointer;
+}
+
+/* ==============================================================================
+   Loading Screen Overlay
+   ============================================================================== */
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #4ec0ca;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.loading-card {
+    background: rgba(25, 35, 45, 0.88);
+    border: 3px solid #f8d030;
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 80%;
+    max-width: 280px;
+    text-align: center;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.loading-bird {
+    width: 44px;
+    height: 32px;
+    background-image: url('/static/assets/images/bird_mid.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    animation: birdFloat 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes birdFloat {
+    0% { transform: translateY(0) rotate(-4deg); }
+    100% { transform: translateY(-8px) rotate(6deg); }
+}
+
+.loading-title {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--gold);
+    letter-spacing: 1.5px;
+    text-shadow: 2px 2px 0 #321e00;
+}
+
+.loading-bar-container {
+    width: 100%;
+    height: 10px;
+    background: #111822;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.loading-bar {
+    width: 15%;
+    height: 100%;
+    background: linear-gradient(90deg, #50e3c2, #f8d030);
+    border-radius: 6px;
+    transition: width 0.2s ease;
+}
+
+.loading-text {
+    font-size: 13px;
+    color: #e0e6ed;
+    font-weight: bold;
+}
