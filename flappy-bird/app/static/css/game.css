@@ -17,6 +17,8 @@
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
 }
 
 html, body {
@@ -28,6 +30,8 @@ html, body {
     display: flex;
     justify-content: center;
     align-items: center;
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
 }
 
 .game-wrapper {
@@ -38,6 +42,8 @@ html, body {
     align-items: center;
     background: radial-gradient(circle at center, #263445 0%, #121820 100%);
     padding: 10px;
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
 }
 
 .canvas-container {
@@ -54,6 +60,11 @@ html, body {
     overflow: hidden;
     aspect-ratio: 400 / 700;
     background-color: var(--sky-blue);
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
 }
 
 #game-canvas {
@@ -67,6 +78,19 @@ html, body {
     image-rendering: pixelated;
     background-color: transparent;
     cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+#game-canvas:focus,
+#game-canvas:focus-visible,
+#game-canvas:active {
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
+    tap-highlight-color: transparent;
 }
 
 /* ==============================================================================
